@@ -18,7 +18,7 @@
  * - `neq`: number/string/boolean, does not equal value
  * - `lt`, `lte`, `gt`, `gte`: number, less/greater than (or equal to) value
  * - `integer`: boolean, if specified, forces value to be integer or to not be integer
- * - `divides`: number, true if the value is a natural divider of specified number
+ * - `divides`: number, true if the value is a natural divisor of specified number
  * - `multiple`: number, true if the value is a multiple of specified number
  * - `contains`: string/any, check that the value contains specified string or value
  * - `begins`: string/any, check that the value begins with specified string or value
@@ -133,11 +133,11 @@ const isInteger = function(number) {
 };
 
 /*
- * Check that a number is exact divider of another
- * `value`: number, the divider
+ * Check that a number is exact divisor of another
+ * `value`: number, the divisor
  * `multiple`: number, the multiple
  */
-const isDivider = function(value, multiple) {
+const isDivisor = function(value, multiple) {
 	if (value === 0)
 		return false;
 	return isInteger(multiple / value);
@@ -244,15 +244,15 @@ const evaluateSingle = function(condition, value, reference) {
 				details: (reference === false ? "non-" : "")+"integer number"
 			}
 		case "divides":
-			if (typeof(value) === "number" && isDivider(value, reference))
+			if (typeof(value) === "number" && isDivisor(value, reference))
 				return { result: true }
 			return {
 				result: false,
 				actual: value,
-				details: "exact divider of %reference%"
+				details: "exact divisor of %reference%"
 			}
 		case "multiple":
-			if (typeof(value) === "number" && isDivider(reference, value))
+			if (typeof(value) === "number" && isDivisor(reference, value))
 				return { result: true }
 			return {
 				result: false,

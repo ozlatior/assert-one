@@ -420,57 +420,57 @@ describe("Condition validation", () => {
 
 	describe("exact division validation", () => {
 
-		it ("validates exact divider condition", () => {
+		it ("validates exact divisor condition", () => {
 			let ret = condition.evaluateValueCondition(7, { divides: 42 });
 			assert.deepEqual(ret, { result: true });
 		});
 
-		it ("validates exact divider condition for floats", () => {
+		it ("validates exact divisor condition for floats", () => {
 			let ret = condition.evaluateValueCondition(7.07, { divides: 42.42 });
 			assert.deepEqual(ret, { result: true });
 		});
 
-		it ("detects exact divider mismatch", () => {
+		it ("detects exact divisor mismatch", () => {
 			let ret = condition.evaluateValueCondition(8, { divides: 42 });
 			assert.deepEqual(ret, {
 				result: false,
 				what: "divides",
 				reference: 42,
 				actual: 8,
-				details: "exact divider of 42"
+				details: "exact divisor of 42"
 			});
 		});
 
-		it ("detects exact divider mismatch for floats", () => {
+		it ("detects exact divisor mismatch for floats", () => {
 			let ret = condition.evaluateValueCondition(7, { divides: 42.42 });
 			assert.deepEqual(ret, {
 				result: false,
 				what: "divides",
 				reference: 42.42,
 				actual: 7,
-				details: "exact divider of 42.42"
+				details: "exact divisor of 42.42"
 			});
 		});
 
-		it ("detects exact divider mismatch", () => {
+		it ("detects exact divisor mismatch", () => {
 			let ret = condition.evaluateValueCondition("7", { divides: 42 });
 			assert.deepEqual(ret, {
 				result: false,
 				what: "divides",
 				reference: 42,
 				actual: "7",
-				details: "exact divider of 42"
+				details: "exact divisor of 42"
 			});
 		});
 
-		it ("detects exact divider mismatch for floats", () => {
+		it ("detects exact divisor mismatch for floats", () => {
 			let ret = condition.evaluateValueCondition("7.07", { divides: 42.42 });
 			assert.deepEqual(ret, {
 				result: false,
 				what: "divides",
 				reference: 42.42,
 				actual: "7.07",
-				details: "exact divider of 42.42"
+				details: "exact divisor of 42.42"
 			});
 		});
 
@@ -1022,7 +1022,7 @@ describe("Condition validation", () => {
 				},
 				actual: 13,
 				details: "type \"string\", non-integer number, 12, 24, less than or equal to 6, " +
-					"exact multiple of 3 or exact divider of 100 or 125"
+					"exact multiple of 3 or exact divisor of 100 or 125"
 			});
 		});
 
