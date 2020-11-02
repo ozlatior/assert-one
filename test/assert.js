@@ -10,15 +10,15 @@ const instance = require("../index.js");
 const MSG_ASSERT_TYPE =
 	"Wrong type for '%varName%', expected %type%, got %_TYPE_%(?funName in %funName%?)";
 const MSG_ASSERT_VALUE =
-	"Wrong value for '%varName%', expected %expected%, got %value%(?funName in %funName%?)";
+	"Wrong value for '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_FIELD_TYPES =
 	"Wrong type for field '%field%' of '%varName%', expected %type%, got %actual%(?funName in %funName%?)";
 const MSG_ASSERT_FIELD_VALUES =
-	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %actual%(?funName in %funName%?)";
+	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_OPTIONAL_FIELD_TYPES =
-	"Wrong type for field '%field%' of '%varName%', expected %type%, got %actual%(?funName in %funName%?)";
+	"Wrong type for field '%field%' of '%varName%', expected %type%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_OPTIONAL_FIELD_VALUES =
-	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %actual%(?funName in %funName%?)";
+	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_ALLOWED_FIELDS =
 	"Unexpected field '%field%' in '%varName%'(?funName in %funName%?)";
 const MSG_ASSERT_FORBIDDEN_FIELDS =
@@ -192,7 +192,7 @@ describe ("Assertion object instance", () => {
 				);
 			}
 			catch (e) {
-				assert.equal(e.message, "Wrong type for field 'c' of 'argument', expected boolean, got undefined");
+				assert.equal(e.message, "Wrong type for field 'c' of 'argument', expected boolean, got <undefined>");
 				return;
 			}
 			throw new Error("Shouldn't be here");
@@ -487,6 +487,405 @@ describe ("Assertion object instance", () => {
 			}
 			catch (e) {
 				assert.equal(e.message, "Field 'z' not allowed in 'argument'");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertEqual", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertEqual(123, 123);
+			instance.assertEqual(123, [ 120, 123 ]);
+			instance.equal("foo", "foo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertEqual(123, 122);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected 122, got 123");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertNotEqual", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertNotEqual(123, 122);
+			instance.assertNotEqual(123, [ 121, 122 ]);
+			instance.notEqual("foo", "bar");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertNotEqual(123, [ 121, 122, 123 ]);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected not 121, 122 or 123, got 123");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertLt", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertLt(123, 124);
+			instance.lt("foo", "goo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertLt(123, 123);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected less than 123, got 123");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertLte", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertLte(123, 124);
+			instance.lte("foo", "foo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertLte(123, 122);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected less than or equal to 122, got 123");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertGt", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertGt(123, 122);
+			instance.gt("foo", "bar");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertGt(123, 124);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected greater than 124, got 123");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertGte", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertGte(123, 123);
+			instance.assertGte(123, 122);
+			instance.gte("foo", "foo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertGte(123, 124);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected greater than or equal to 124, got 123");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertInteger", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertInteger(123);
+			instance.assertInteger(43, true);
+			instance.integer(41.5, false);
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertInteger(123.5);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected integer number, got 123.5");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertDivides", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertDivides(5, 10);
+			instance.divides(3, [ 100, 33 ]);
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertDivides(5, 49);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected exact divisor of 49, got 5");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertMultiple", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertMultiple(25, 5);
+			instance.assertMultiple(66, [ 3, 5, 7 ]);
+			instance.multiple(42, 7);
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertMultiple(100, 21);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected exact multiple of 21, got 100");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertContains", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertContains("abcdef", "abc");
+			instance.assertContains("abcdef", [ "xyz", "bcd" ]);
+			instance.contains("foo", "foo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertContains("abcdef", "bce");
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected string containing \"bce\", got \"abcdef\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertBegins", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertBegins("abcdef", [ "abc", "cde" ]);
+			instance.begins("foobar", "foo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertBegins("abdef", [ "abc", "def", "xyz" ]);
+			}
+			catch (e) {
+				assert.equal(e.message,
+					"Wrong value for 'argument', expected string beginning with \"abc\", \"def\" or \"xyz\", got \"abdef\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertEnds", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertEnds("abcdef", [ "xyz", "def" ]);
+			instance.ends("foo", "foo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertEnds("abcdefg", "def");
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected string ending with \"def\", got \"abcdefg\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertMatches", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertMatches("abcdef", "^[a-f]+$");
+			instance.assertMatches("abcdef", /^[a-f]+$/);
+			instance.matches("foo", "foo");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertMatches("abcdefg", "^[a-f]+$");
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected string matching \"^[a-f]+$\", got \"abcdefg\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertContainsNot", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertContainsNot("abcdef", "xyz");
+			instance.assertContainsNot("abcdef", [ "123", "cba" ]);
+			instance.containsNot("foo", "bar");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertContainsNot("abcdef", [ "123", "cba", "bcd" ]);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument'," +
+					" expected string not containing \"123\", \"cba\" or \"bcd\", got \"abcdef\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertBeginsNot", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertBeginsNot("abcdef", "bcd");
+			instance.assertBeginsNot("abcdef", [ "bcd", "xyz" ]);
+			instance.beginsNot("foo", "bar");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertBeginsNot("abcdef", [ "bcd", "xyz", "abc" ]);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument'," +
+					" expected string not beginning with \"bcd\", \"xyz\" or \"abc\", got \"abcdef\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertEndsNot", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertEndsNot("abcdef", "bcd");
+			instance.assertEndsNot("abcdef", [ "abc", "xyz" ]);
+			instance.endsNot("foo", "bar");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertEndsNot("abcdef", [ "abc", "def", "xyz" ]);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument'," +
+					" expected string not ending with \"abc\", \"def\" or \"xyz\", got \"abcdef\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertMatchesNot", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertMatchesNot("abcdef", "[1-6]+");
+			instance.assertMatchesNot("abcdef", /[1-6]+/);
+			instance.matchesNot("foo", "bar");
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertMatchesNot("abcdef", [ /[x-z]+/, /[a-f]+/ ]);
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument'," +
+					" expected string not matching /[x-z]+/ or /[a-f]+/, got \"abcdef\"");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertLength", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertLength("abcdef", 6);
+			instance.assertLength("abcdef", { lte: 6 });
+			instance.length("", 0);
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertLength("123456", { gt: 6 });
+			}
+			catch (e) {
+				assert.equal(e.message, "Wrong value for 'argument', expected length greater than 6, got 6");
+				return;
+			}
+			throw new Error("Shouldn't be here");
+		});
+
+	});
+
+	describe ("assertEach", () => {
+
+		it ("passes for valid values", () => {
+			instance.assertEach([ 1, 2, 6 ], { lte: 6 });
+			instance.assertEach([ "foo", "bar" ], { matchesNot: /[0-9]/ });
+			instance.each([ 2, 4, 6 ], { integer: true });
+		});
+
+		it ("fails for invalid values", () => {
+			try {
+				instance.assertEach([ "foo", "123", "bar" ], { containsNot: [ "2", "5" ] });
+			}
+			catch (e) {
+				assert.equal(e.message,
+					"Wrong value for 'argument', expected string not containing \"2\" or \"5\", got \"123\"");
 				return;
 			}
 			throw new Error("Shouldn't be here");

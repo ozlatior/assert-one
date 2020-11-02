@@ -11,15 +11,15 @@ const evaluator = require("./condition.js");
 const MSG_ASSERT_TYPE =
 	"Wrong type for '%varName%', expected %type%, got %_TYPE_%(?funName in %funName%?)";
 const MSG_ASSERT_VALUE =
-	"Wrong value for '%varName%', expected %expected%, got %value%(?funName in %funName%?)";
+	"Wrong value for '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_FIELD_TYPES =
 	"Wrong type for field '%field%' of '%varName%', expected %type%, got %actual%(?funName in %funName%?)";
 const MSG_ASSERT_FIELD_VALUES =
-	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %actual%(?funName in %funName%?)";
+	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_OPTIONAL_FIELD_TYPES =
-	"Wrong type for field '%field%' of '%varName%', expected %type%, got %actual%(?funName in %funName%?)";
+	"Wrong type for field '%field%' of '%varName%', expected %type%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_OPTIONAL_FIELD_VALUES =
-	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %actual%(?funName in %funName%?)";
+	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_ALLOWED_FIELDS =
 	"Unexpected field '%field%' in '%varName%'(?funName in %funName%?)";
 const MSG_ASSERT_FORBIDDEN_FIELDS =
@@ -92,6 +92,7 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
 	 */
 	_assertType (value, type, errorClass, varName, funName) {
 		if (errorClass === undefined)
@@ -116,16 +117,22 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 * `stackDepth`: number, extra stack depth to add on top of the default stack depth
 	 */
-	_assertValue (value, condition, errorClass, varName, funName) {
+	_assertValue (value, condition, errorClass, varName, funName, stackDepth) {
 		if (errorClass === undefined)
 			errorClass = Error;
+		if (stackDepth === undefined)
+			stackDepth = 0;
 		let res = evaluator.evaluateValueCondition(value, condition);
 		return this._runAssertion(res.result, errorClass, {
-			message: this.assertValue.message
+			message: this.assertValue.message,
+			stackDepth: this.defaultOptions.stackDepth + stackDepth
 		}, {
 			value: value,
 			expected: res.details,
+			actual: res.actual,
 			varName: varName,
 			funName: funName
 		});
@@ -141,6 +148,7 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
 	 */
 	_assertFieldTypes (value, fields, errorClass, varName, funName) {
 		if (errorClass === undefined)
@@ -149,12 +157,15 @@ class Assert {
 			let type = fields[i];
 			if (!(type instanceof Array))
 				type = [ type ];
+			let actual = typeof(value[i]);
+			if (actual === "undefined")
+				actual = "<undefined>";
 			this._runAssertion(type.indexOf(typeof(value[i])) !== -1, errorClass, {
 				message: this.assertFieldTypes.message
 			}, {
 				value: value[i],
 				type: type.join("/"),
-				actual: typeof(value[i]),
+				actual: actual,
 				varName: varName,
 				field: i,
 				funName: funName
@@ -173,6 +184,7 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
 	 */
 	_assertFieldValues (value, fields, errorClass, varName, funName) {
 		if (errorClass === undefined)
@@ -184,7 +196,7 @@ class Assert {
 			}, {
 				value: value[i],
 				expected: res.details,
-				actual: res.actual === undefined ? "<undefined>" : res.actual,
+				actual: res.actual,
 				varName: varName,
 				field: i,
 				funName: funName
@@ -203,6 +215,7 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
 	 */
 	_assertOptionalFieldTypes (value, fields, errorClass, varName, funName) {
 		if (errorClass === undefined)
@@ -237,6 +250,7 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
 	 */
 	_assertOptionalFieldValues (value, fields, errorClass, varName, funName) {
 		if (errorClass === undefined)
@@ -267,6 +281,7 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
 	 */
 	_assertAllowedFields (value, fields, errorClass, varName, funName) {
 		if (errorClass === undefined)
@@ -292,6 +307,7 @@ class Assert {
 	 * `varName`: string, original variable or argument name that is being asserted (for error message),
 	 *            defaults to `argument`
 	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
 	 */
 	_assertForbiddenFields (value, fields, errorClass, varName, funName) {
 		if (errorClass === undefined)
@@ -307,6 +323,278 @@ class Assert {
 				funName: funName
 			});
 		}
+	}
+
+	/*
+	 * Shorthands for different conditions
+	 */
+
+	/*
+	 * Check that value equals reference value
+	 * `value`: any type, value to check
+	 * `reference`: any type, reference value
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertEqual (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { eq: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value does not equal reference value
+	 * `value`: any type, value to check
+	 * `reference`: any type, reference value
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertNotEqual (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { neq: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value is strictly less than reference value
+	 * `value`: string or number, value to check
+	 * `reference`: string or number, reference value
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertLt (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { lt: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value is less than or equal to reference value
+	 * `value`: any type, value to check
+	 * `reference`: any type, reference value
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertLte (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { lte: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value is strictly greater than reference value
+	 * `value`: string or number, value to check
+	 * `reference`: string or number, reference value
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertGt (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { gt: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value is greater than or equal to reference value
+	 * `value`: string or number, value to check
+	 * `reference`: string or number, reference value
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertGte (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { gte: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value is strictly integer or float
+	 * `value`: number, value to check
+	 * `reference`: boolean, `true` for integer, `false` for float, defaults to `true`
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertInteger (value, reference, errorClass, varName, funName) {
+		if (reference === undefined)
+			reference = true;
+		return this._assertValue(value, { integer: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value divides a reference value exactly
+	 * `value`: number, value to check
+	 * `reference`: number, reference number
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertDivides (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { divides: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that value is an exact multiple of the reference value
+	 * `value`: number, value to check
+	 * `reference`: number, reference number
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertMultiple (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { multiple: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that a string contains a substring
+	 * `value`: string, string to check
+	 * `reference`: string, reference substring
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertContains (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { contains: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that a string begins with a substring
+	 * `value`: string, string to check
+	 * `reference`: string, reference substring
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertBegins (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { begins: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that a string ends with a substring
+	 * `value`: string, string to check
+	 * `reference`: string, reference substring
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertEnds (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { ends: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that string matches regexp
+	 * `value`: string, string to check
+	 * `reference`: string or RegExp object, regexp to match
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertMatches (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { matches: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that a string does not contain reference substring
+	 * `value`: string, string to check
+	 * `reference`: string, reference substring
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertContainsNot (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { containsNot: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that a string does not begin with reference substring
+	 * `value`: string, string to check
+	 * `reference`: string, reference substring
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertBeginsNot (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { beginsNot: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that a string does not end with reference substring
+	 * `value`: string, string to check
+	 * `reference`: string, reference substring
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertEndsNot (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { endsNot: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that string does not match regexp
+	 * `value`: string, string to check
+	 * `reference`: string or RegExp object, regexp the string shouldn't match
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertMatchesNot (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { matchesNot: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that length of string or array matches condition
+	 * `value`: string or array, the item to check the length of
+	 * `reference`: condition object or number, length should match this condition
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertLength (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { length: reference }, errorClass, varName, funName, 1);
+	}
+
+	/*
+	 * Check that each element of an array matches condition
+	 * `value`: array, the array to check the elements of
+	 * `reference`: condition object, condition all elements should match
+	 * `errorClass`: class, error class to use for thrown error (defaults to Error)
+	 * `varName`: string, original variable or argument name that is being asserted (for error message),
+	 *            defaults to `argument`
+	 * `funName`: string, original function name where this assertion was called (for error message)
+	 *            defaults to `undefined`, which does not appear in the default error message
+	 */
+	assertEach (value, reference, errorClass, varName, funName) {
+		return this._assertValue(value, { each: reference }, errorClass, varName, funName, 1);
 	}
 
 }
@@ -337,6 +625,28 @@ const getInstance = function() {
 	ret.optionalValues = ret.assertOptionalFieldValues;
 	ret.allowedFields = ret.assertAllowedFields;
 	ret.forbiddenFields = ret.assertForbiddenFields;
+
+	ret.eq = ret.assertEqual;
+	ret.equal = ret.assertEqual;
+	ret.neq = ret.assertNotEqual;
+	ret.notEqual = ret.assertNotEqual;
+	ret.lt = ret.assertLt;
+	ret.lte = ret.assertLte;
+	ret.gt = ret.assertGt;
+	ret.gte = ret.assertGte;
+	ret.integer = ret.assertInteger;
+	ret.divides = ret.assertDivides;
+	ret.multiple = ret.assertMultiple;
+	ret.contains = ret.assertContains;
+	ret.begins = ret.assertBegins;
+	ret.ends = ret.assertEnds;
+	ret.matches = ret.assertMatches;
+	ret.containsNot = ret.assertContainsNot;
+	ret.beginsNot = ret.assertBeginsNot;
+	ret.endsNot = ret.assertEndsNot;
+	ret.matchesNot = ret.assertMatchesNot;
+	ret.length = ret.assertLength;
+	ret.each = ret.assertEach;
 
 	// setup default messages for instance
 	ret.assertType.message = MSG_ASSERT_TYPE;
