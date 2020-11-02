@@ -12,6 +12,8 @@
  * Macros are defined by the library:
  * - `%_TYPE_%`: `typeof value`
  * - `%_LEN_%`: `value.length`
+ * - '%_ACTUAL_%`: 'stringified' version of the `actual` field
+ * - '%_VALUE_%`: 'stringified' version of the `value` field
  *
  * Conditional expressions are parts of the string surrounded by `(?...?)` tokens
  * They begin with a condition which can either be the name of a token, which translates
@@ -104,10 +106,18 @@ const evaluateCondition = function(con, values) {
  */
 const runMacro = function(macro, tokens) {
 	switch (macro) {
-		case "_TYPE_":
-			return typeof(tokens.value);
+		case "_ACTUAL_":
+			if (tokens.actual === undefined)
+				return "<undefined>";
+			return JSON.stringify(tokens.actual);
 		case "_LEN_":
 			return tokens.value.length;
+		case "_TYPE_":
+			return typeof(tokens.value);
+		case "_VALUE_":
+			if (tokens.value === undefined)
+				return "<undefined>";
+			return JSON.stringify(tokens.value);
 	}
 };
 

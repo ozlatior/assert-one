@@ -64,6 +64,18 @@ describe ("Message processing functions", () => {
 			assert.equal(message.runMacro("_LEN_", { value: [ 1, 2 ] }), 2);
 		});
 
+		it ("evaluates _ACTUAL_ macro", () => {
+			assert.equal(message.runMacro("_ACTUAL_", { actual: 1234 }), "1234");
+			assert.equal(message.runMacro("_ACTUAL_", { actual: "1234" }), "\"1234\"");
+			assert.equal(message.runMacro("_ACTUAL_", { actual: [ 1, 2 ] }), "[1,2]");
+		});
+
+		it ("evaluates _VALUE_ macro", () => {
+			assert.equal(message.runMacro("_VALUE_", { value: 1234 }), "1234");
+			assert.equal(message.runMacro("_VALUE_", { value: "1234" }), "\"1234\"");
+			assert.equal(message.runMacro("_VALUE_", { value: [ 1, 2 ] }), "[1,2]");
+		});
+
 	});
 
 	describe ("extractSubs", () => {
