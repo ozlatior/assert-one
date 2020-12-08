@@ -73,6 +73,7 @@ Example::
 *Available assertion methods*
 
 ::
+
     Method                 Alias              Passes if ...
     ---------------------- ------------------ -----------------------------------------------------------------------
     assertType()           type()             the variable type equals one of the reference values
@@ -140,6 +141,7 @@ Using a string or number value directly (instead of a condition object) is equiv
 *Available conditions*
 
 ::
+
     Condition              Passes if ...
     ---------------------- ------------------------------------------------------------------------------------------
     type                   the variable type equals one of the reference values
@@ -192,6 +194,7 @@ instance.assertValue() / assert.value()
 ---------------------------------------
 
 ::
+
     assert.value(value, condition, [ errorClass, varName, funName ] )
 
 Checks a single value against the condition object (or array of condition objects), eg::
@@ -205,6 +208,7 @@ instance.assertFieldTypes() / assert.fieldTypes()
 -------------------------------------------------
 
 ::
+
     assert.fieldTypes(object, fields, errorClass, varName, funName)
 
 Checks that all the object fields are of the respective field types, eg::
@@ -217,6 +221,7 @@ instance.assertFieldValues() / assertFieldValues()
 --------------------------------------------------
 
 ::
+
     assertFieldValues(object, fields, [ errorClass, varName, funName ] )
 
 Checks that all object fields validate their respective conditions, eg::
@@ -229,6 +234,7 @@ instance.assertOptionalFieldTypes() / assert.optionalFieldTypes()
 -----------------------------------------------------------------
 
 ::
+
     assert.optionalFieldTypes(object, fields, errorClass, varName, funName)
 
 Checks that all the object fields are of the respective field types and ignores missing fields, eg::
@@ -241,6 +247,7 @@ instance.assertOptionalFieldValues() / assert.optionalFieldValues()
 -------------------------------------------------------------------
 
 ::
+
     assert.optionalFieldValues(object, fields, [ errorClass, varName, funName ] )
 
 Checks that all object fields validate their respective conditions and ignores missing fields, eg::
@@ -253,6 +260,7 @@ instance.assertAllowedFields() / assert.allowedFields()
 -------------------------------------------------------
 
 ::
+
     assert.allowedFields(object, fields, [ errorClass, varName, funName ] )
 
 Checks that only the allowed fields are present in the object, eg::
@@ -265,6 +273,7 @@ instance.assertForbiddenFields() / assert.forbiddenFields()
 -----------------------------------------------------------
 
 ::
+
     assert.forbiddenFields(object, fields, [ errorClass, varName, funName ] )
 
 Checks that none of the forbidden fields are present in the object, eg::
