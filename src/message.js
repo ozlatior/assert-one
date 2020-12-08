@@ -28,12 +28,14 @@ const CONDITION_REGEXP = /^[^ ]+( *(===|==|!==|!=|>=|>|<=|<) *(('[^']*')|([^ ]+)
 
 /*
  * Parse condition string such as `type === "number"`
- * Returns an object containing the operator and the operands
- * In case no operator is identified, the condition will be treated as `!== undefined`
+ *
+ * In case no operator is identified, the condition will be treated as `boolean`
+ *
  * Condition fields:
  * - `operator`: string, one of `===`, `==`, `!==`, `!=`, `>=`, `>`, `<=`, `<`, `boolean`
  * - `lho`: string, the name of the field that will be evaluated
  * - `rho`: any type, the value expected for `lho`
+ * Returns an object containing the operator and the operands
  */
 const parseCondition = function(con) {
 	let operator = con.match(/(===|==|!==|!=|>=|>|<=|<)/g);
@@ -53,11 +55,12 @@ const parseCondition = function(con) {
 
 /*
  * Evaluate a parsed condition object using user values
- * The field name will be looked up in the `values` object
- * Condition fields:
- * - `operator`: string, one of `===`, `==`, `!==`, `!=`, `>=`, `>`, `<=`, `<`, `boolean`
- * - `lho`: string, the name of the field that will be evaluated
- * - `rho`: any type, the value expected for `lho`
+ * - `con`: object, describes the condition using the fields:
+ *   - `operator`: string, one of `===`, `==`, `!==`, `!=`, `>=`, `>`, `<=`, `<`, `boolean`
+ *   - `lho`: string, the name of the field that will be evaluated
+ *   - `rho`: any type, the value expected for `lho`
+ * - `values`: object, the field name (lho) will be looked up in the `values` object
+ * Returns `true` if condition is found to be true, false otherwise.
  */
 const evaluateCondition = function(con, values) {
 	switch (con.operator) {
@@ -103,6 +106,11 @@ const evaluateCondition = function(con, values) {
 
 /*
  * Evaluate a macro based on name and tokens object (should contain `value` field)
+ * `macro`: string, the macro to evaluate (eg `_ACTUAL_`, `_LEN_` etc)
+ * `tokens`: object, list of values for this operation; this should contain the fields:
+ * - `actual` for the _ACTUAL_ macro
+ * - `value` for the _LEN_, _TYPE_ and _VALUE_ macros
+ * Returns string, the result of the macro with the given tokens.
  */
 const runMacro = function(macro, tokens) {
 	switch (macro) {
@@ -123,6 +131,14 @@ const runMacro = function(macro, tokens) {
 
 /*
  * Extract sub expressions (conditionals) from message
+ * `message`: string, message to extract expressions from
+ *
+ * Conditional expressions are parts of the string surrounded by `(?...?)` tokens
+ * They begin with a condition which can either be the name of a token, which translates
+ * to `<token> !== undefined`, or an binary operator expression such as `<token> === <value>`
+ *
+ * Conditional expressions can be nested
+ *
  * Returns an object where the keys are the extracted conditionals and the values are the
  * parsed properties:
  * - `con`: object, condition object
@@ -168,6 +184,9 @@ const extractSubs = function(message) {
 /*
  * Entry function for message processing; replaces tokens in message with values in `tokens` object
  * and evaluates conditional substrings
+ * `message`: string, input message with tokens to replace
+ * `tokens`: object, user values for message tokens
+ * Returns string, the message with tokens and conditionals replaced with actual values.
  */
 const replaceTokens = function(message, tokens) {
 	// get a list of all conditional substrings and evaluate the conditions

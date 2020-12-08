@@ -3,13 +3,17 @@
  */
 
 /*
- * Conditions are in object form;
- * If conditions or values are in an array, it means either of the conditions have to be fullfilled
- * The object field specifies the condition operator or type, eg
+ * Conditions are in object form
+ *
+ * If conditions or values are in an array, either of the conditions have to be fullfilled (`or`)
+ *
+ * The object field name specifies the condition operator or type, and the value is the reference
+ * value for the condition, eg
  * `{ gte: 4, lte: 10, integer: true }` - between 4 and 10 inclusively, integer
  * `{ eq: [ 1, 5, 10 ] }` - either of the values 1, 5 or 10
  * `[ { eq: false }, { integer: true, gte: 0 } ]` - either `false` or any non-negative integer
- * Some properties can be specified through a condition:
+ *
+ * Some properties can be subjected to a condition as well
  * `{ length: { gte: 10, lte: 20 } }` - check that string length is between 10 and 20
  *
  * Condition list:
@@ -36,18 +40,22 @@
  * Convert a value to string for messages
  * `value`: any type, value to convert to string
  * `stringify`: boolean, call stringify on elements (defaults to true)
+ *
+ * If `stringify` is used, the value is converted using the `JSON.stringify()` function, which
+ * results in strings being placed between quotes
+ *
+ * Returns: string, the converted value
  */
 const convertToString = function(value, stringify) {
 	if (value instanceof RegExp)
 		return value.toString();
 	if (stringify || stringify === undefined)
 		return JSON.stringify(value);
-	return value;
+	return "" + value;
 };
 
 /*
- * Join List
- * Join an array as if it was a list of values
+ * Join an array as if it was a enumeration of values
  * `list`: array, array to join
  * `option`: object:
  * - `stringify`: boolean, call stringify on elements (defaults to true)
@@ -77,6 +85,17 @@ const joinList = function(list, options) {
 
 /*
  * Build a list of reference values from multiple conditions output
+ * `list`: array of objects, the conditions to merge into the returned object;
+ *    each field should contain the elements
+ *    - `what`: string, the condition operator name
+ *    - `value`: string, reference value
+ *
+ * Returns an object where fields are condition operator names (from `what` fields)
+ * and the values are arrays of all reference values of the input conditions, eg:
+ *
+ * :: [ { what: "eq", reference: [ 10, 11 ] },
+ *      { what: "eq", reference: 12 },           --->   { eq: [ 10, 11, 12 ], integer: true }
+ *      { what: "integer", reference: true } ]
  */
 const referenceList = function(list) {
 	let ret = {};
@@ -98,7 +117,10 @@ const referenceList = function(list) {
 };
 
 /*
- * Check that a condition is nested
+ * Check that a condition should be treated as a nested condition
+ * `condition`: string, the condition operator name
+ * Returns boolean, true for conditions that should be treated as nested conditions:
+ * `length`, `each`, `none`, false otherwise
  */
 const isNestedCondition = function(condition) {
 	switch (condition) {
@@ -111,7 +133,10 @@ const isNestedCondition = function(condition) {
 };
 
 /*
- * Check that a condition is negative
+ * Check that a condition should be treated as a negative condition
+ * `condition`: string, the condition operator name
+ * Returns boolean, true for conditions which should be handled in negative logic,
+ * such as `neq`, `containsNot`, `endsNot` ..., false otherwise
  */
 const isNegativeCondition = function(condition) {
 	switch (condition) {
@@ -127,6 +152,8 @@ const isNegativeCondition = function(condition) {
 
 /*
  * Check that a number is integer
+ * `number`: number, value to check
+ * Returns boolean, true for integer number, false otherwise
  */
 const isInteger = function(number) {
 	return number === parseInt(number);
@@ -136,6 +163,8 @@ const isInteger = function(number) {
  * Check that a number is exact divisor of another
  * `value`: number, the divisor
  * `multiple`: number, the multiple
+ * Returns boolean, true if there is an n so that multiple = n * value and n is integer,
+ * false otherwise
  */
 const isDivisor = function(value, multiple) {
 	if (value === 0)
