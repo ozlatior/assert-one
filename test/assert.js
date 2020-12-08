@@ -16,7 +16,7 @@ const MSG_ASSERT_FIELD_TYPES =
 const MSG_ASSERT_FIELD_VALUES =
 	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_OPTIONAL_FIELD_TYPES =
-	"Wrong type for field '%field%' of '%varName%', expected %type%, got %_ACTUAL_%(?funName in %funName%?)";
+	"Wrong type for field '%field%' of '%varName%', expected %type%, got %actual%(?funName in %funName%?)";
 const MSG_ASSERT_OPTIONAL_FIELD_VALUES =
 	"Wrong value for field '%field%' of '%varName%', expected %expected%, got %_ACTUAL_%(?funName in %funName%?)";
 const MSG_ASSERT_ALLOWED_FIELDS =
