@@ -47,7 +47,7 @@ const MSG_ASSERT_FORBIDDEN_FIELDS =
  * - assertEquals -> equals
  * - etc
  *
- * To customize error messages, change the `message` field of one of the assertion methods, eg::
+ * To customize error messages, change the `message` field of one of the assertion methods, eg:
  *
  * :: assert.assertType.message = "...";
  *
@@ -752,13 +752,6 @@ class Assert {
 		return this._assertValue(value, { each: reference }, errorClass, varName, funName, 1);
 	}
 
-	/*
-	 * @alias assertEach
-	 */
-	assertElements (value, reference, errorClass, varName, funName) {
-		return this.assertEach(value, reference, errorClass, varName, funName);
-	}
-
 }
 
 const prototypeCall = function(fn, ref) {
@@ -842,6 +835,5 @@ const instance = getInstance();
 instance.new = getInstance;
 
 // @pattern singleton Assert
-// @export assert
 module.exports = instance;
 module.exports.Assert = Assert;
