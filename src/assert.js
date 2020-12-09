@@ -783,8 +783,8 @@ const getInstance = function() {
 	ret.value = ret.assertValue;
 	ret.fieldTypes = ret.assertFieldTypes;
 	ret.fieldValues = ret.assertFieldValues;
-	ret.optionalTypes = ret.assertOptionalFieldTypes;
-	ret.optionalValues = ret.assertOptionalFieldValues;
+	ret.optionalFieldTypes = ret.assertOptionalFieldTypes;
+	ret.optionalFieldValues = ret.assertOptionalFieldValues;
 	ret.allowedFields = ret.assertAllowedFields;
 	ret.forbiddenFields = ret.assertForbiddenFields;
 
