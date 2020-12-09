@@ -1,6 +1,6 @@
 {
   "name": "assert-one",
-  "version": "0.0.1",
+  "version": "0.0.1-b",
   "description": "Assertion Library with custom error messages for nodejs",
   "main": "index.js",
   "scripts": {
@@ -25,5 +25,8 @@
   "bugs": {
     "url": "https://github.com/ozlatior/assert-one/issues"
   },
-  "homepage": "https://github.com/ozlatior/assert-one#readme"
+  "homepage": "https://github.com/ozlatior/assert-one#readme",
+  "directories": {
+    "test": "test"
+  }
 }
