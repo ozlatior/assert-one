@@ -1,6 +1,6 @@
 {
   "name": "assert-one",
-  "version": "0.0.1-b",
+  "version": "0.0.1-c",
   "description": "Assertion Library with custom error messages for nodejs",
   "main": "index.js",
   "scripts": {
